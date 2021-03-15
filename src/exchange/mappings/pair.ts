@@ -6,7 +6,7 @@ import {
   WHITELIST,
 } from '../../constants'
 import { Address, BigDecimal, BigInt, log, store } from '@graphprotocol/graph-ts'
-import { Burn, Mint, Pair, Swap, Token, Transaction } from '../../../generated/schema'
+import { Buyer, Burn, Mint, Pair, Swap, Token, Transaction } from '../../../generated/schema'
 import {
   Burn as BurnEvent,
   Mint as MintEvent,
@@ -577,6 +577,31 @@ export function onSwap(event: SwapEvent): void {
   factory.untrackedVolumeUSD = factory.untrackedVolumeUSD.plus(derivedAmountUSD)
   factory.txCount = factory.txCount.plus(BigInt.fromI32(1))
 
+
+  // buyer user stats
+  let buyer = Buyer.load(event.params.to.toHexString())
+  let isNewUser = false
+  if (buyer === null) {
+    isNewUser = true
+
+    buyer = new Buyer(event.params.to.toHexString())
+    buyer.createdAtBlockNumber = event.block.number
+    buyer.createdAtTimestamp = event.block.timestamp
+    buyer.totalVolumeUSD = derivedAmountUSD
+    buyer.totalVolumeETH = derivedAmountETH
+    buyer.txCount = BigInt.fromI32(1)
+    buyer.save()
+
+    factory.buyerCount = factory.buyerCount.plus(BigInt.fromI32(1))
+    
+  } else {
+    buyer.totalVolumeUSD = buyer.totalVolumeUSD.plus(derivedAmountUSD)
+    buyer.totalVolumeETH = buyer.totalVolumeETH.plus(derivedAmountETH)
+    buyer.txCount = buyer.txCount.plus(BigInt.fromI32(1))
+    buyer.save()
+  }
+
+
   // save entities
   pair.save()
   token0.save()
@@ -625,6 +650,15 @@ export function onSwap(event: SwapEvent): void {
 
   const token0DayData = updateTokenDayData(token0 as Token, event)
   const token1DayData = updateTokenDayData(token1 as Token, event)
+
+
+  // new buyer specific updates
+  if (isNewUser) dayData.newBuyerCount = dayData.newBuyerCount.plus(BigInt.fromI32(1))
+  if (!dayData.activeBuyers.includes(event.params.to.toHexString())) {
+    dayData.activeBuyers = dayData.activeBuyers.concat([event.params.to.toHexString()])
+    dayData.activeBuyerCount = dayData.activeBuyerCount.plus(BigInt.fromI32(1))
+  }
+
 
   // swap specific updating
   dayData.volumeUSD = dayData.volumeUSD.plus(trackedAmountUSD)

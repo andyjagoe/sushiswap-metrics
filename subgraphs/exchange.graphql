@@ -26,6 +26,15 @@ type User @entity {
   liquidityPositions: [LiquidityPosition!]! @derivedFrom(field: "user")
 }
 
+type Buyer @entity {
+  id: ID!
+  createdAtTimestamp: BigInt!
+  createdAtBlockNumber: BigInt!
+  txCount: BigInt!
+  totalVolumeUSD: BigDecimal!
+  totalVolumeETH: BigDecimal! 
+}
+
 # Bundle
 type Bundle @entity {
   id: ID!
@@ -63,6 +72,7 @@ type Factory @entity {
 
   # User count
   userCount: BigInt!
+  buyerCount: BigInt!
 
   # Pairs
   pairs: [Pair!]! @derivedFrom(field: "factory")
@@ -123,6 +133,12 @@ type DayData @entity {
 
   # tx count
   txCount: BigInt!
+
+  # buyer data
+  newBuyerCount: BigInt!
+  activeBuyers: [String!]
+  activeBuyerCount: BigInt!
+
 }
 
 # Token

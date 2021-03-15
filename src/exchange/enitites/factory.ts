@@ -16,6 +16,7 @@ export function getFactory(id: Address = FACTORY_ADDRESS): Factory {
     factory.txCount = BIG_INT_ZERO
     factory.tokenCount = BIG_INT_ZERO
     factory.userCount = BIG_INT_ZERO
+    factory.buyerCount = BIG_INT_ZERO
     factory.save()
   }
 
@@ -38,6 +39,9 @@ export function getDayData(event: ethereum.Event): DayData {
     dayData.liquidityUSD = factory.liquidityUSD
     dayData.liquidityETH = factory.liquidityETH
     dayData.txCount = factory.txCount
+    dayData.newBuyerCount = BIG_INT_ZERO
+    dayData.activeBuyers = []
+    dayData.activeBuyerCount = BIG_INT_ZERO
   }
 
   return dayData as DayData
