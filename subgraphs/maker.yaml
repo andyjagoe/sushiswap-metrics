@@ -1,6 +1,6 @@
 specVersion: 0.0.3
 description: Maker
-repository: https://github.com/sushiswap/sushiswap-subgraph
+repository: https://github.com/andyjagoe/sushiswap-metrics
 schema:
   file: ./maker.graphql
 dataSources:
